@@ -11,6 +11,10 @@ function funXY(x, y) {
   return [x, y]
 }
 
+function joined(arr) {
+  return arr.join('')
+}
+
 
 exports.setUp = function (done) {
   this.graph = new shepherd.Graph().enforceMatchingParams()
@@ -242,3 +246,52 @@ builder.add(function testShepherdExtraBuildsParamsFails(test) {
       test.notEqual(hasMsg, -1)
     })
 })
+
+// Test that subgraph's don't get checked
+builder.add(function testSubgraphSucceeds(test) {
+  this.graph.add('arr-funXY', funXY, ['x', 'y'])
+  this.graph.add('str-joined', joined, ['arr'])
+
+
+  this.graph.add('x-double', this.graph.subgraph, ['x'])
+    .builds('arr-funXY')
+      .using({x: 'args.x'}, {y: 'args.x'})
+    .builds('str-joined')
+      .using('arr-funXY')
+
+  this.graph.newBuilder()
+    .builds('x-double')
+    .run({x: this.graph.literal('a')})
+    .then(function (results) {
+      test.equal(results['x-double'], 'XX',
+          "graph.subgraph shouldn't be param checked")
+    })
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> Stashed changes
